@@ -12,7 +12,7 @@ import (
 
 // Take the data from the block
 
-// create a counter which starts at 0
+// create a counter (nonce) which starts at 0
 
 // create a hash of the data plus the counter
 
@@ -21,7 +21,6 @@ import (
 // Requirements:
 // The First few bytes must contain 0s
 
-// Difficulty is now static -> Increase difficulty with time (Implement algorithm for this)
 const Difficulty = 18
 
 type ProofOfWork struct {
@@ -34,6 +33,7 @@ func NewProof(b *Block) *ProofOfWork {
 	target.Lsh(target, uint(256-Difficulty))
 
 	pow := &ProofOfWork{b, target}
+
 	return pow
 }
 
@@ -47,6 +47,7 @@ func (pow *ProofOfWork) InitData(nonce int) []byte {
 		},
 		[]byte{},
 	)
+
 	return data
 }
 
@@ -55,9 +56,10 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 	var hash [32]byte
 
 	nonce := 0
+
 	for nonce < math.MaxInt64 {
 		data := pow.InitData(nonce)
-		hash := sha256.Sum256(data)
+		hash = sha256.Sum256(data)
 
 		fmt.Printf("\r%x", hash)
 		intHash.SetBytes(hash[:])
@@ -67,8 +69,10 @@ func (pow *ProofOfWork) Run() (int, []byte) {
 		} else {
 			nonce++
 		}
+
 	}
 	fmt.Println()
+
 	return nonce, hash[:]
 }
 
@@ -81,7 +85,6 @@ func (pow *ProofOfWork) Validate() bool {
 	intHash.SetBytes(hash[:])
 
 	return intHash.Cmp(pow.Target) == -1
-
 }
 
 func ToHex(num int64) []byte {
@@ -89,6 +92,8 @@ func ToHex(num int64) []byte {
 	err := binary.Write(buff, binary.BigEndian, num)
 	if err != nil {
 		log.Panic(err)
+
 	}
+
 	return buff.Bytes()
 }
