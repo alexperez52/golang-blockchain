@@ -5,6 +5,10 @@ import (
 	"crypto/sha256"
 )
 
+type BlockChain struct {
+	blocks []*Block
+}
+
 type Block struct {
 	Hash     []byte
 	Data     []byte
@@ -17,6 +21,30 @@ func (b *Block) DeriveHash() {
 	b.Hash = hash[:]
 }
 
-func main() {
+func CreateBlock(data string, prevHash []byte) *Block {
+	block := &Block{[]byte{}, []byte(data), prevHash}
+	block.DeriveHash()
+	return block
+}
 
+func (chain *BlockChain) AddBlock(data string) {
+	prevBlock := chain.blocks[len(chain.blocks)-1]
+	new := CreateBlock(data, prevBlock.Hash)
+	chain.blocks = append(chain.blocks, new)
+}
+
+// Creates first block that serves as the first reference
+func Genesis() *Block {
+	return CreateBlock("Genesis", []byte{})
+}
+
+func InitBlockChain() *BlockChain {
+	return &BlockChain{[]*Block{Genesis()}}
+}
+
+func main() {
+	chain := InitBlockChain()
+	chain.AddBlock("First Block after Genesis")
+	chain.AddBlock("Second Block after Genesis")
+	chain.AddBlock("Third Block after Genesis")
 }
